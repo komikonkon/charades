@@ -1,0 +1,10 @@
+{
+  "db_connect_info"   : {
+    "host"    : "localhost",
+    "port"    : 3306,
+    "user"    : "tdxlocal",
+    "passwd"  : "tdxlocal",
+    "charset" : "utf8",
+    "db_name" : "charades"
+  }
+}
