@@ -38,11 +38,12 @@ class Timer():
     # タイマー停止フラグ
     is_stop = False
     
-    def __init__(self, minutes, seconds, timer_text, data_table, result_table, correct_answer_number, page):
+    def __init__(self, minutes, seconds, timer_text, display_word, data_table, result_table, correct_answer_number, page):
         """コンストラクタ"""
         self.minutes = minutes
         self.seconds = seconds
         self.timer_text = timer_text
+        self.display_word = display_word
         self.data_table = data_table
         self.result_table = result_table
         self.correct_answer_number = correct_answer_number
@@ -67,6 +68,10 @@ class Timer():
     def _timer_stopped(self):
         """タイマーが停止した時の処理"""
         global QUESTIONS_LIST
+        
+        # 最後に表示された単語をリストに追加
+        if not self.display_word.value == "No anymore.":
+            QUESTIONS_LIST.append([self.display_word.value, self.display_word.data, ""])
         
         # タイマー終了メッセージを表示
         self.timer_text.value = "終了！"
@@ -146,6 +151,7 @@ def increment_used_count(displayed_word):
     Raises:
         Exception: 使用回数の更新に失敗した場合。
     """
+    return  # TODO: Debug用
     is_succeeded = _exe_sql_upd(sqls.UpdateStatement.update_used_count, [displayed_word])
     if is_succeeded:
         return
