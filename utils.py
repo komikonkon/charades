@@ -138,14 +138,11 @@ def show_english_words(en_ja_words_list, fl_display_word):
     fl_display_word.data  = f"{en_ja_words_list[randint][1]}"
 
     # 単語の長さに応じてフォントサイズを変更
-    # if len(fl_display_word.value) >= 27:
-    if len(fl_display_word.value) >= 25:
+    if len(fl_display_word.value) >= 27:
         fl_display_word.size = 90
-    # elif len(fl_display_word.value) >= 19:
-    elif len(fl_display_word.value) >= 15:
+    elif len(fl_display_word.value) >= 17:
         fl_display_word.size = 120
-    # elif len(fl_display_word.value) >= 14:
-    elif len(fl_display_word.value) >= 10:
+    elif len(fl_display_word.value) >= 12:
         fl_display_word.size = 150
     else:
         fl_display_word.size = 200
@@ -166,7 +163,7 @@ def increment_used_count(displayed_word):
     Raises:
         Exception: 使用回数の更新に失敗した場合。
     """
-    return  # TODO: Debug用
+    # return  # TODO: Debug用
     is_succeeded = _exe_sql_upd(sqls.UpdateStatement.update_used_count, [displayed_word])
     if is_succeeded:
         return
