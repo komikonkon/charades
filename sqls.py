@@ -1,4 +1,3 @@
-
 class SelectStatement() :
     get_words = '''
         SELECT
@@ -12,7 +11,7 @@ class SelectStatement() :
             AND used_count = 0
             AND delete_flag = 0;
         '''
-        
+
 
 class UpdateStatement() :
     update_used_count = '''

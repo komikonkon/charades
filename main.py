@@ -6,25 +6,25 @@ from global_variables import EN_JA_WORDS_LIST, QUESTIONS_LIST
 
 def main(page: ft.Page):
     global QUESTIONS_LIST
-    
+
     # アプリタイトル
     page.title = "Charades"
-    
+
     # レスポンシブ設定ON
     page.adaptive = True
-    
+
     # ウィンドウサイズを指定
     screen_width, screen_height = get_screen_size()
-    page.window_width = screen_width - 100
-    page.window_height = screen_height - 130
-    
+    page.window.width = screen_width - 100
+    page.window.height = screen_height - 130
+
     # ウィンドウをやや中央に配置
     window_x = (screen_width - page.window_width) // 2
     window_y = (screen_height - page.window_height) // 2 - 20
     page.window_left = window_x
     page.window_top = window_y
-    
-    
+
+
     # #################################
     # クリックイベント定義
     # #################################
@@ -32,13 +32,13 @@ def main(page: ft.Page):
     def on_play_click(e):
         # グローバル変数を使用するための宣言
         global EN_JA_WORDS_LIST
-        
+
         # 英単語一覧を取得
         EN_JA_WORDS_LIST = get_english_words(fl_level.value)
-        
+
         # ページ遷移
         page.go("/play")
-        
+
         # タイマー開始
         if Timer.is_stop:
             Timer.is_stop = False
@@ -46,52 +46,52 @@ def main(page: ft.Page):
         seconds = int(fl_seconds_dropdown.value)
         timer = Timer(minutes, seconds, fl_timer_text, fl_display_word, data_table, fl_result_table, fl_correct_answer_number, page)
         threading.Thread(target=timer.start_timer, daemon=True).start()
-        
+
         # 最初の英単語を表示
         displayed_word = show_english_words(EN_JA_WORDS_LIST, fl_display_word)
-        
+
         # 英単語リストから表示した単語を削除
         EN_JA_WORDS_LIST = [row for row in EN_JA_WORDS_LIST if row[0] != displayed_word]
         increment_used_count(displayed_word)
-    
+
     # 「SKIP」ボタンクリック
     def on_skip_click(e):
         # グローバル変数を使用するための宣言
         global EN_JA_WORDS_LIST
-        
+
         # 出題した単語のリストに追加
         if not fl_display_word.value == "No anymore.":
             QUESTIONS_LIST.append([fl_display_word.value, fl_display_word.data, ""])
-        
+
         # 次の英単語を表示
         displayed_word = show_english_words(EN_JA_WORDS_LIST, fl_display_word)
-        
+
         # 英単語リストから表示した単語を削除
         EN_JA_WORDS_LIST = [row for row in EN_JA_WORDS_LIST if row[0] != displayed_word]
         increment_used_count(displayed_word)
-        
-        
+
+
     # 「正解」ボタンクリック
     def on_correct_click(e):
         # グローバル変数を使用するための宣言
         global EN_JA_WORDS_LIST
-        
+
         # 出題した単語のリストに追加
         if not fl_display_word.value == "No anymore.":
             QUESTIONS_LIST.append([fl_display_word.value, fl_display_word.data, "✓"])
-        
+
         # 次の英単語を表示
         displayed_word = show_english_words(EN_JA_WORDS_LIST, fl_display_word)
-        
+
         # 英単語リストから表示した単語を削除
         EN_JA_WORDS_LIST = [row for row in EN_JA_WORDS_LIST if row[0] != displayed_word]
         increment_used_count(displayed_word)
-        
+
     # 「メイン画面へ」ボタンクリック
     def on_back_click(e):
         goto_top(e)
-    
-    
+
+
     # #################################
     # 1. トップページのコンポーネント
     # #################################
@@ -104,18 +104,18 @@ def main(page: ft.Page):
             ft.dropdown.Option("初級"),
             ft.dropdown.Option("中級"),
             ft.dropdown.Option("上級"),
-            # ft.dropdown.Option("固有名詞"),   # TODO: 文字サイズ調整が必要
+            # ft.dropdown.Option("固有名詞"),
         ],
         width=400,
         value="入門"
     )
-    
+
     # 難易度説明テキスト
     fl_explain1 = ft.Text("入門: TOEIC 400以下、英検3級、高校入試、中学生", size=10, color='gray')
     fl_explain2 = ft.Text("初級: TOEIC 600～400、英検2級、大学入試、高校生", size=10, color='gray')
     fl_explain3 = ft.Text("中級: TOEIC 800～600、英検準1級、難関大学入試、高校生", size=10, color='gray')
     fl_explain4 = ft.Text("上級: TOEIC 800以上、英検1級、最難関大学入試、高校生", size=10, color='gray')
-    # explain5 = ft.Text("固有名詞: 人名、国名、ブランド名、観光名所、映画タイトルなど", size=10, color='gray') # TODO: 文字サイズ調整が必要
+    # fl_explain5 = ft.Text("固有名詞: 人名、国名、ブランド名、観光名所、映画タイトルなど", size=10, color='gray')
 
     # タイマー設定ドロップダウン
     fl_timer_intro = ft.Text("タイマーを設定してください", size=20, weight=ft.FontWeight.BOLD)
@@ -144,20 +144,20 @@ def main(page: ft.Page):
             shape={"": ft.RoundedRectangleBorder(radius=8)}
         )
     )
-    
-    
+
+
     # #################################
     # 2. プレイページのコンポーネント
     # #################################
     # 画面表示する英単語テキスト
     fl_display_word = ft.Text("", size=200, weight=ft.FontWeight.BOLD)
-    
+
     # タイマーアイコン
     fl_timer_icon = ft.Icon(name="TIMER_SHARP", size=88, color=ft.Colors.BLACK)
-    
+
     # タイマー表示テキスト
     fl_timer_text = ft.Text("00:00", size=77, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK)
-    
+
     # 「正解」ボタン
     fl_correct_btn = ft.ElevatedButton(
         content=ft.Row(
@@ -178,7 +178,7 @@ def main(page: ft.Page):
             shape={"": ft.RoundedRectangleBorder(radius=8)}
         )
     )
-    
+
     # 「スキップ」ボタン
     fl_skip_btn = ft.ElevatedButton(
         content=ft.Row(
@@ -199,8 +199,8 @@ def main(page: ft.Page):
             shape={"": ft.RoundedRectangleBorder(radius=8)}
         )
     )
-    
-    
+
+
     # #################################
     # 3. リザルトページのコンポーネント
     # #################################
@@ -238,12 +238,12 @@ def main(page: ft.Page):
             ),
         ]
     )
-    
+
     # 正解数表示テキスト
     fl_correct_answer_subject = ft.Text(
-        "あなたの正解数は", 
-        size=20, 
-        weight=ft.FontWeight.BOLD, 
+        "あなたの正解数は",
+        size=20,
+        weight=ft.FontWeight.BOLD,
         color=ft.Colors.BLUE_ACCENT_400,
         style=ft.TextStyle(
             decoration=ft.TextDecoration.UNDERLINE,
@@ -252,9 +252,9 @@ def main(page: ft.Page):
         )
     )
     fl_correct_answer_number  = ft.Text(
-        "**", 
-        size=50, 
-        weight=ft.FontWeight.BOLD, 
+        "**",
+        size=50,
+        weight=ft.FontWeight.BOLD,
         color=ft.Colors.RED_ACCENT_400,
         style=ft.TextStyle(
             decoration=ft.TextDecoration.UNDERLINE,
@@ -262,9 +262,9 @@ def main(page: ft.Page):
         )
     )
     fl_correct_answer_unit    = ft.Text(
-        "個", 
-        size=20, 
-        weight=ft.FontWeight.BOLD, 
+        "個",
+        size=20,
+        weight=ft.FontWeight.BOLD,
         color=ft.Colors.BLUE_ACCENT_400,
         style=ft.TextStyle(
             decoration=ft.TextDecoration.UNDERLINE,
@@ -272,7 +272,7 @@ def main(page: ft.Page):
             decoration_color=ft.Colors.BLUE_ACCENT_400
         )
     )
-    
+
     # 出題した英単語・日本語訳・正否の表コントロール
     result_table_header = ["English word", "Japanese word", "Correct"]
     result_table_data   = QUESTIONS_LIST    # 配置の段階ではデータ空。タイマー終了時にデータを更新する。
@@ -284,9 +284,9 @@ def main(page: ft.Page):
         controls=[data_table],
         scroll=ft.ScrollMode.ALWAYS,
         expand=True,
-        height=400
+        height=350
     )
-    
+
     # 「メイン画面へ」ボタン
     fl_back_to_main_btn = ft.ElevatedButton(
         content=ft.Row(
@@ -307,21 +307,21 @@ def main(page: ft.Page):
             shape={"": ft.RoundedRectangleBorder(radius=8)}
         )
     )
-    
+
     # #################################
     # 共通コンポーネント
     # #################################
     # 空白行
     fl_blank = ft.Text("")
-    
-    
+
+
     # #################################
     # ページ遷移イベント
     # #################################
     # ページを更新する
     def route_change(e):
         print("Route change:", e.route)
-        
+
         # ページクリア
         page.views.clear()
 
@@ -334,6 +334,7 @@ def main(page: ft.Page):
                     ft.Column(
                         [
                             # 難易度選択
+                            # fl_level_intro, fl_level, fl_explain1, fl_explain2, fl_explain3, fl_explain4, fl_explain5, fl_blank,
                             fl_level_intro, fl_level, fl_explain1, fl_explain2, fl_explain3, fl_explain4, fl_blank,
                             # タイマー設定
                             fl_timer_intro,
@@ -352,7 +353,7 @@ def main(page: ft.Page):
                 ],
             )
         )
-        
+
         # プレイページ（viewに追加する）
         if page.route == "/play":
             page.views.append(
@@ -372,7 +373,7 @@ def main(page: ft.Page):
                     ],
                 )
             )
-            
+
         # リザルトページ（viewに追加する）
         if page.route == "/result":
             page.views.append(
@@ -384,8 +385,8 @@ def main(page: ft.Page):
                                 fl_blank,
                                 fl_result_intro,
                                 ft.Row([
-                                    fl_correct_answer_subject, 
-                                    fl_correct_answer_number, 
+                                    fl_correct_answer_subject,
+                                    fl_correct_answer_number,
                                     fl_correct_answer_unit
                                     ], alignment=ft.MainAxisAlignment.CENTER,),
                                 fl_result_table,
@@ -397,7 +398,7 @@ def main(page: ft.Page):
                     ],
                 )
             )
-            
+
         # ページ更新
         page.update()
 
@@ -405,32 +406,32 @@ def main(page: ft.Page):
     def view_pop(e):
         # グローバル変数を使用するための宣言
         global EN_JA_WORDS_LIST, QUESTIONS_LIST
-        
+
         # スレッドのタイマーを停止＆リセット
         Timer.is_stop = True
-        
+
         # グローバル変数のリセット
         EN_JA_WORDS_LIST.clear()
         QUESTIONS_LIST.clear()
-        
+
         # ページを削除して、前のページに戻る
         print("View pop:", e.view)
         page.views.pop()
         top_view = page.views[-1]
         page.go(top_view.route)
-        
+
     # トップページに戻る
     def goto_top(e):
         # グローバル変数を使用するための宣言
         global EN_JA_WORDS_LIST, QUESTIONS_LIST
-        
+
         # グローバル変数のリセット
         EN_JA_WORDS_LIST.clear()
         QUESTIONS_LIST.clear()
-        
+
         # スレッドのタイマーを停止＆リセット
         Timer.is_stop = True
-        
+
         # 全てのページをクリアしてトップページに戻る
         page.views.clear()
         page.go("/")
@@ -452,5 +453,5 @@ def main(page: ft.Page):
     page.go(page.route)
 
 
-# ft.app(target=main, view=ft.WEB_BROWSER, port=8080)
-ft.app(target=main)
+ft.app(target=main, view=ft.WEB_BROWSER, port=8080)
+# ft.app(target=main)
