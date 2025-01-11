@@ -38,13 +38,13 @@ class Timer():
     # タイマー停止フラグ
     is_stop = False
 
-    def __init__(self, minutes, seconds, fl_timer_text, fl_display_word, data_table, fl_result_table, fl_correct_answer_number, page):
+    def __init__(self, minutes, seconds, fl_timer_text, fl_display_word, fl_data_table, fl_result_table, fl_correct_answer_number, page):
         """コンストラクタ"""
         self.minutes = minutes
         self.seconds = seconds
         self.fl_timer_text = fl_timer_text
         self.fl_display_word = fl_display_word
-        self.data_table = data_table
+        self.fl_data_table = fl_data_table
         self.fl_result_table = fl_result_table
         self.fl_correct_answer_number = fl_correct_answer_number
         self.page = page
@@ -78,9 +78,9 @@ class Timer():
         self.fl_timer_text.update()
 
         # データテーブルを更新する
-        self.data_table.rows = get_data_table_rows(QUESTIONS_LIST)
-        if self.data_table.page:
-            self.data_table.update()
+        self.fl_data_table.rows = get_data_table_rows(QUESTIONS_LIST)
+        if self.fl_data_table.page:
+            self.fl_data_table.update()
         if self.fl_result_table.page:
             self.fl_result_table.update()
 
@@ -133,9 +133,24 @@ def show_english_words(en_ja_words_list, fl_display_word):
     # ランダムに単語を選択
     randint = random.randint(0, len(en_ja_words_list))
 
-    # 単語を表示
+    # 単語をセット
     fl_display_word.value = f"{en_ja_words_list[randint][0]}"
     fl_display_word.data  = f"{en_ja_words_list[randint][1]}"
+
+    # 単語の長さに応じてフォントサイズを変更
+    # if len(fl_display_word.value) >= 27:
+    if len(fl_display_word.value) >= 25:
+        fl_display_word.size = 90
+    # elif len(fl_display_word.value) >= 19:
+    elif len(fl_display_word.value) >= 15:
+        fl_display_word.size = 120
+    # elif len(fl_display_word.value) >= 14:
+    elif len(fl_display_word.value) >= 10:
+        fl_display_word.size = 150
+    else:
+        fl_display_word.size = 200
+
+    # 単語を表示
     if fl_display_word.page:
         fl_display_word.update()
 

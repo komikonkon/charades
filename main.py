@@ -19,10 +19,10 @@ def main(page: ft.Page):
     page.window.height = screen_height - 130
 
     # ウィンドウをやや中央に配置
-    window_x = (screen_width - page.window_width) // 2
-    window_y = (screen_height - page.window_height) // 2 - 20
-    page.window_left = window_x
-    page.window_top = window_y
+    window_x = (screen_width - page.window.width) // 2
+    window_y = (screen_height - page.window.height) // 2 - 20
+    page.window.left = window_x
+    page.window.top = window_y
 
 
     # #################################
@@ -44,7 +44,7 @@ def main(page: ft.Page):
             Timer.is_stop = False
         minutes = int(fl_minutes_dropdown.value)
         seconds = int(fl_seconds_dropdown.value)
-        timer = Timer(minutes, seconds, fl_timer_text, fl_display_word, data_table, fl_result_table, fl_correct_answer_number, page)
+        timer = Timer(minutes, seconds, fl_timer_text, fl_display_word, fl_data_table, fl_result_table, fl_correct_answer_number, page)
         threading.Thread(target=timer.start_timer, daemon=True).start()
 
         # 最初の英単語を表示
@@ -151,6 +151,12 @@ def main(page: ft.Page):
     # #################################
     # 画面表示する英単語テキスト
     fl_display_word = ft.Text("", size=200, weight=ft.FontWeight.BOLD)
+    # Containerでfl_display_wordをラップして中央に配置
+    fl_display_word_container = ft.Container(
+        content=fl_display_word,
+        alignment=ft.alignment.center,
+        height=300
+    )
 
     # タイマーアイコン
     fl_timer_icon = ft.Icon(name="TIMER_SHARP", size=88, color=ft.Colors.BLACK)
@@ -273,15 +279,15 @@ def main(page: ft.Page):
         )
     )
 
-    # 出題した英単語・日本語訳・正否の表コントロール
+    # 出題した英単語・日本語訳・正否の表
     result_table_header = ["English word", "Japanese word", "Correct"]
     result_table_data   = QUESTIONS_LIST    # 配置の段階ではデータ空。タイマー終了時にデータを更新する。
-    data_table = ft.DataTable(
+    fl_data_table = ft.DataTable(
         columns=get_data_table_columns(result_table_header),
         rows=get_data_table_rows(result_table_data),    # 配置の段階ではデータ空。タイマー終了時にデータを更新する。
     )
     fl_result_table = ft.Column(   # スクロール設定と拡大設定をするためにColumnコントロールにDataTableを配置
-        controls=[data_table],
+        controls=[fl_data_table],
         scroll=ft.ScrollMode.ALWAYS,
         expand=True,
         height=350
@@ -363,7 +369,8 @@ def main(page: ft.Page):
                         ft.Column(
                             [
                                 ft.Row([fl_timer_icon, fl_timer_text], alignment=ft.MainAxisAlignment.CENTER,),
-                                fl_display_word,
+                                # fl_display_word,
+                                fl_display_word_container,
                                 fl_blank, fl_blank,
                                 ft.Row([fl_correct_btn, ft.Text("         "), fl_skip_btn], alignment=ft.MainAxisAlignment.CENTER,),
                             ],
