@@ -38,15 +38,15 @@ class Timer():
     # タイマー停止フラグ
     is_stop = False
 
-    def __init__(self, minutes, seconds, timer_text, display_word, data_table, result_table, correct_answer_number, page):
+    def __init__(self, minutes, seconds, fl_timer_text, fl_display_word, data_table, fl_result_table, fl_correct_answer_number, page):
         """コンストラクタ"""
         self.minutes = minutes
         self.seconds = seconds
-        self.timer_text = timer_text
-        self.display_word = display_word
+        self.fl_timer_text = fl_timer_text
+        self.fl_display_word = fl_display_word
         self.data_table = data_table
-        self.result_table = result_table
-        self.correct_answer_number = correct_answer_number
+        self.fl_result_table = fl_result_table
+        self.fl_correct_answer_number = fl_correct_answer_number
         self.page = page
 
     def start_timer(self):
@@ -57,9 +57,9 @@ class Timer():
             if Timer.is_stop:
                 return
             mins, secs = divmod(total_seconds, 60)
-            self.timer_text.value = f"{mins:02}:{secs:02}"
-            if self.timer_text.page:
-                self.timer_text.update()
+            self.fl_timer_text.value = f"{mins:02}:{secs:02}"
+            if self.fl_timer_text.page:
+                self.fl_timer_text.update()
             time.sleep(1)
             total_seconds -= 1
 
@@ -70,32 +70,32 @@ class Timer():
         global QUESTIONS_LIST
 
         # 最後に表示された単語をリストに追加
-        if not self.display_word.value == "No anymore.":
-            QUESTIONS_LIST.append([self.display_word.value, self.display_word.data, ""])
+        if not self.fl_display_word.value == "No anymore.":
+            QUESTIONS_LIST.append([self.fl_display_word.value, self.fl_display_word.data, ""])
 
         # タイマー終了メッセージを表示
-        self.timer_text.value = "終了！"
-        self.timer_text.update()
+        self.fl_timer_text.value = "終了！"
+        self.fl_timer_text.update()
 
         # データテーブルを更新する
         self.data_table.rows = get_data_table_rows(QUESTIONS_LIST)
         if self.data_table.page:
             self.data_table.update()
-        if self.result_table.page:
-            self.result_table.update()
+        if self.fl_result_table.page:
+            self.fl_result_table.update()
 
         # 正解数を更新
         correct_count = sum(1 for word in QUESTIONS_LIST if word[2] == "✓")
-        self.correct_answer_number.value = str(correct_count)
-        if self.correct_answer_number.page:
-            self.correct_answer_number.update()
+        self.fl_correct_answer_number.value = str(correct_count)
+        if self.fl_correct_answer_number.page:
+            self.fl_correct_answer_number.update()
 
         Timer.is_stop = True
 
         self.page.go("/result")
 
 
-def get_english_words(level):
+def get_english_words(fl_level):
     """データベースから指定した難易度の英単語を取得する。
 
     Args:
@@ -104,7 +104,7 @@ def get_english_words(level):
     Returns:
         List[List[str, str]]: 英単語と日本語訳のリスト。
     """
-    words_tuple = _exe_sql_sel(sqls.SelectStatement.get_words, [level])
+    words_tuple = _exe_sql_sel(sqls.SelectStatement.get_words, [fl_level])
 
     en_ja_words_list = []
     for word_row in words_tuple:
@@ -113,7 +113,7 @@ def get_english_words(level):
     return en_ja_words_list
 
 
-def show_english_words(en_ja_words_list, display_word):
+def show_english_words(en_ja_words_list, fl_display_word):
     """英単語を画面に表示する。
 
     Args:
@@ -125,21 +125,21 @@ def show_english_words(en_ja_words_list, display_word):
     """
     # 表示する単語がない場合
     if len(en_ja_words_list) == 0:
-        display_word.value = "No anymore."
-        if display_word.page:
-            display_word.update()
+        fl_display_word.value = "No anymore."
+        if fl_display_word.page:
+            fl_display_word.update()
         return "No anymore."
 
     # ランダムに単語を選択
     randint = random.randint(0, len(en_ja_words_list))
 
     # 単語を表示
-    display_word.value = f"{en_ja_words_list[randint][0]}"
-    display_word.data  = f"{en_ja_words_list[randint][1]}"
-    if display_word.page:
-        display_word.update()
+    fl_display_word.value = f"{en_ja_words_list[randint][0]}"
+    fl_display_word.data  = f"{en_ja_words_list[randint][1]}"
+    if fl_display_word.page:
+        fl_display_word.update()
 
-    return display_word.value
+    return fl_display_word.value
 
 
 def increment_used_count(displayed_word):

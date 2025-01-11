@@ -104,7 +104,7 @@ def main(page: ft.Page):
             ft.dropdown.Option("初級"),
             ft.dropdown.Option("中級"),
             ft.dropdown.Option("上級"),
-            # ft.dropdown.Option("固有名詞"),
+            ft.dropdown.Option("固有名詞"),
         ],
         width=400,
         value="入門"
@@ -115,7 +115,7 @@ def main(page: ft.Page):
     fl_explain2 = ft.Text("初級: TOEIC 600～400、英検2級、大学入試、高校生", size=10, color='gray')
     fl_explain3 = ft.Text("中級: TOEIC 800～600、英検準1級、難関大学入試、高校生", size=10, color='gray')
     fl_explain4 = ft.Text("上級: TOEIC 800以上、英検1級、最難関大学入試、高校生", size=10, color='gray')
-    # fl_explain5 = ft.Text("固有名詞: 人名、国名、ブランド名、観光名所、映画タイトルなど", size=10, color='gray')
+    fl_explain5 = ft.Text("固有名詞: 人名、国名、ブランド名、観光名所、映画タイトルなど", size=10, color='gray')
 
     # タイマー設定ドロップダウン
     fl_timer_intro = ft.Text("タイマーを設定してください", size=20, weight=ft.FontWeight.BOLD)
@@ -334,8 +334,7 @@ def main(page: ft.Page):
                     ft.Column(
                         [
                             # 難易度選択
-                            # fl_level_intro, fl_level, fl_explain1, fl_explain2, fl_explain3, fl_explain4, fl_explain5, fl_blank,
-                            fl_level_intro, fl_level, fl_explain1, fl_explain2, fl_explain3, fl_explain4, fl_blank,
+                            fl_level_intro, fl_level, fl_explain1, fl_explain2, fl_explain3, fl_explain4, fl_explain5, fl_blank,
                             # タイマー設定
                             fl_timer_intro,
                             ft.Row(
