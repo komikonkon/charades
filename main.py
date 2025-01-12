@@ -1,8 +1,14 @@
 import threading
+import time
+
 import flet as ft
 
-from utils import Timer, get_english_words, show_english_words, increment_used_count, get_data_table_columns, get_data_table_rows, get_screen_size
 from global_variables import EN_JA_WORDS_LIST, QUESTIONS_LIST
+from read_settings import JSON_DATA
+from utils import (Timer, get_data_table_columns, get_data_table_rows,
+                   get_english_words, get_screen_size, increment_used_count,
+                   play_sound, show_english_words)
+
 
 def main(page: ft.Page):
     global QUESTIONS_LIST
@@ -54,14 +60,25 @@ def main(page: ft.Page):
         EN_JA_WORDS_LIST = [row for row in EN_JA_WORDS_LIST if row[0] != displayed_word]
         increment_used_count(displayed_word)
 
-    # 「SKIP」ボタンクリック
-    def on_skip_click(e):
+    # 「正解」ボタンクリック
+    def on_correct_click(e):
         # グローバル変数を使用するための宣言
         global EN_JA_WORDS_LIST
 
+        # 正解音を再生
+        sound_thread = threading.Thread(target=play_sound, args=(JSON_DATA['sound_file_path']['correct'],), daemon=True)
+        sound_thread.start()
+
+        # 大きな○を表示
+        fl_overlay_circle.visible = not fl_overlay_circle.visible
+        page.update()
+        time.sleep(0.1) # NOTE: ○を視認できるようにするための待機
+        fl_overlay_circle.visible = not fl_overlay_circle.visible
+        page.update()
+
         # 出題した単語のリストに追加
         if not fl_display_word.value == "No anymore.":
-            QUESTIONS_LIST.append([fl_display_word.value, fl_display_word.data, ""])
+            QUESTIONS_LIST.append([fl_display_word.value, fl_display_word.data, "✓"])
 
         # 次の英単語を表示
         displayed_word = show_english_words(EN_JA_WORDS_LIST, fl_display_word)
@@ -70,15 +87,25 @@ def main(page: ft.Page):
         EN_JA_WORDS_LIST = [row for row in EN_JA_WORDS_LIST if row[0] != displayed_word]
         increment_used_count(displayed_word)
 
-
-    # 「正解」ボタンクリック
-    def on_correct_click(e):
+    # 「SKIP」ボタンクリック
+    def on_skip_click(e):
         # グローバル変数を使用するための宣言
         global EN_JA_WORDS_LIST
 
+        # 不正解音を再生
+        sound_thread = threading.Thread(target=play_sound, args=(JSON_DATA['sound_file_path']['incorrect'],), daemon=True)
+        sound_thread.start()
+
+        # 大きな×を表示
+        fl_overlay_cross.visible = not fl_overlay_cross.visible
+        page.update()
+        time.sleep(0.1) # ×を視認できるようにするための待機
+        fl_overlay_cross.visible = not fl_overlay_cross.visible
+        page.update()
+
         # 出題した単語のリストに追加
         if not fl_display_word.value == "No anymore.":
-            QUESTIONS_LIST.append([fl_display_word.value, fl_display_word.data, "✓"])
+            QUESTIONS_LIST.append([fl_display_word.value, fl_display_word.data, ""])
 
         # 次の英単語を表示
         displayed_word = show_english_words(EN_JA_WORDS_LIST, fl_display_word)
@@ -204,6 +231,20 @@ def main(page: ft.Page):
             padding={"": 10},
             shape={"": ft.RoundedRectangleBorder(radius=8)}
         )
+    )
+
+    # 大きな丸（正解時に表示）
+    fl_overlay_circle = ft.Container(
+        content=ft.Icon(name=ft.icons.CIRCLE_OUTLINED, size=400, color=ft.Colors.with_opacity(0.5, ft.Colors.GREEN_ACCENT_200)),
+        alignment=ft.alignment.center,
+        visible=False,
+    )
+
+    # 大きなバツ（スキップ時に表示）
+    fl_overlay_cross = ft.Container(
+        content=ft.Icon(name=ft.icons.CLOSE, size=400, color=ft.Colors.with_opacity(0.4, ft.Colors.RED_ACCENT_700)),
+        alignment=ft.alignment.center,
+        visible=False,
     )
 
 
@@ -337,24 +378,30 @@ def main(page: ft.Page):
                 "/",
                 [
                     ft.AppBar(title=ft.Text("ゲーム設定")),
-                    ft.Column(
+                    ft.Stack(
                         [
-                            # 難易度選択
-                            fl_level_intro, fl_level, fl_explain1, fl_explain2, fl_explain3, fl_explain4, fl_explain5, fl_blank,
-                            # タイマー設定
-                            fl_timer_intro,
-                            ft.Row(
+                            ft.Column(
                                 [
-                                    fl_minutes_dropdown,
-                                    fl_seconds_dropdown
+                                    # 難易度選択
+                                    fl_level_intro, fl_level, fl_explain1, fl_explain2, fl_explain3, fl_explain4, fl_explain5, fl_blank,
+                                    # タイマー設定
+                                    fl_timer_intro,
+                                    ft.Row(
+                                        [
+                                            fl_minutes_dropdown,
+                                            fl_seconds_dropdown
+                                        ],
+                                        alignment=ft.MainAxisAlignment.CENTER,
+                                    ),
+                                    # プレイボタン
+                                    fl_blank, fl_start_btn
                                 ],
-                                alignment=ft.MainAxisAlignment.CENTER,
+                                horizontal_alignment=ft.CrossAxisAlignment.CENTER
                             ),
-                            # プレイボタン
-                            fl_blank, fl_start_btn
                         ],
-                        horizontal_alignment=ft.CrossAxisAlignment.CENTER
-                    )
+                        expand=True,  # 画面の見切れを防ぐために設定
+                        alignment=ft.alignment.center,
+                    ),
                 ],
             )
         )
@@ -366,16 +413,23 @@ def main(page: ft.Page):
                     "/play",
                     [
                         ft.AppBar(title=ft.Text("プレイ")),
-                        ft.Column(
+                        ft.Stack(
                             [
-                                ft.Row([fl_timer_icon, fl_timer_text], alignment=ft.MainAxisAlignment.CENTER,),
-                                # fl_display_word,
-                                fl_display_word_container,
-                                fl_blank, fl_blank,
-                                ft.Row([fl_correct_btn, ft.Text("         "), fl_skip_btn], alignment=ft.MainAxisAlignment.CENTER,),
+                                ft.Column(
+                                    [
+                                        ft.Row([fl_timer_icon, fl_timer_text], alignment=ft.MainAxisAlignment.CENTER,),
+                                        fl_display_word_container,
+                                        fl_blank, fl_blank,
+                                        ft.Row([fl_correct_btn, ft.Text("         "), fl_skip_btn], alignment=ft.MainAxisAlignment.CENTER,),
+                                    ],
+                                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                ),
+                                fl_overlay_circle,
+                                fl_overlay_cross,
                             ],
-                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                        )
+                            expand=False,  # NOTE: 正解/不正解時にオーバーレイ表示する○/×を英単語の上に表示するためにFalseに設定
+                            alignment=ft.alignment.center,
+                        ),
                     ],
                 )
             )
@@ -386,21 +440,28 @@ def main(page: ft.Page):
                 ft.View(
                     "/result",
                     [
-                        ft.Column(
+                        ft.Stack(
                             [
-                                fl_blank,
-                                fl_result_intro,
-                                ft.Row([
-                                    fl_correct_answer_subject,
-                                    fl_correct_answer_number,
-                                    fl_correct_answer_unit
-                                    ], alignment=ft.MainAxisAlignment.CENTER,),
-                                fl_result_table,
-                                fl_blank,
-                                fl_back_to_main_btn
+                                ft.Column(
+                                    [
+                                        fl_blank,
+                                        fl_result_intro,
+                                        ft.Row([
+                                            fl_correct_answer_subject,
+                                            fl_correct_answer_number,
+                                            fl_correct_answer_unit
+                                            ], alignment=ft.MainAxisAlignment.CENTER,),
+                                        fl_result_table,
+                                        fl_blank,
+                                        fl_back_to_main_btn,
+                                        fl_blank,
+                                    ],
+                                    horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                                )
                             ],
-                            horizontal_alignment=ft.CrossAxisAlignment.CENTER
-                        )
+                            expand=True,  # 画面の見切れを防ぐために設定
+                            alignment=ft.alignment.center,
+                        ),
                     ],
                 )
             )

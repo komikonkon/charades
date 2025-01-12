@@ -1,13 +1,15 @@
 import ctypes
-import time
 import random
-import MySQLdb
-from MySQLdb.constants.CLIENT import MULTI_STATEMENTS
-import flet as ft
+import time
 
-from read_settings import JSON_DATA
-from global_variables import QUESTIONS_LIST
+import flet as ft
+import MySQLdb
+import pygame
+from MySQLdb.constants.CLIENT import MULTI_STATEMENTS
+
 import sqls
+from global_variables import QUESTIONS_LIST
+from read_settings import JSON_DATA
 
 
 def get_screen_size():
@@ -197,6 +199,15 @@ def get_data_table_rows(data):
         cells = [ft.DataCell(ft.Text(str(t))) for t in row]
         converted_rows.append(ft.DataRow(cells=cells))
     return converted_rows
+
+
+def play_sound(file_path):
+    pygame.mixer.init()
+    sound = pygame.mixer.Sound(file_path)
+    sound.play()
+    # 音が再生されるまで待機
+    while pygame.mixer.get_busy():
+        pygame.time.delay(100)
 
 
 def _exe_sql_sel(sql, prm=None) :
