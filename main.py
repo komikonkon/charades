@@ -40,12 +40,6 @@ def main(page: ft.Page):
         # グローバル変数を使用するための宣言
         global EN_JA_WORDS_LIST
 
-        # 虹色の色リスト（カウントダウン表示用）
-        rainbow_colors = [
-            ft.Colors.RED, ft.Colors.ORANGE, ft.Colors.YELLOW,ft.Colors.GREEN, ft.Colors.BLUE,
-            ft.Colors.INDIGO, ft.Colors.PURPLE, ft.Colors.PINK, ft.Colors.LIME, ft.Colors.CYAN
-        ]
-
         # 英単語一覧を取得
         EN_JA_WORDS_LIST = get_english_words(fl_level.value)
 
@@ -58,20 +52,11 @@ def main(page: ft.Page):
         fl_countdown.visible = True
         for i in range(3, 0, -1):
             fl_countdown.content.value = str(i)
-            for color in rainbow_colors:
-                fl_countdown.content.color = color
-                page.update()
-                time.sleep(0.1)  # 計1秒待機
-        fl_countdown.content.value = "START!"
-        fl_countdown.content.size = 250
-        page.update()
-        for color in itertools.chain(rainbow_colors, rainbow_colors, rainbow_colors):
-            fl_countdown.content.color = color
             page.update()
-            time.sleep(0.1)
-            # カウントダウンの効果音が終了したらループを抜ける
-            if not sound_thread.is_alive():
-                break
+            time.sleep(1)
+        fl_countdown.content.value = "START!"
+        fl_countdown.content.size = 300
+        page.update()
 
         # 効果音再生が終わるまでページ遷移は行わない
         sound_thread.join()
@@ -79,11 +64,10 @@ def main(page: ft.Page):
         # ページ遷移
         page.go("/play")
 
-        # カウントダウン表示の設定をリセット
+        # トップページの表示をリセット
         fl_appbar_top.visible = True
         fl_countdown.visible = False
         fl_countdown.content.size = 400
-        fl_countdown.content.color = ft.Colors.BLUE_ACCENT_700
 
         # タイマー開始
         if Timer.is_stop:
@@ -156,6 +140,10 @@ def main(page: ft.Page):
 
     # 「メイン画面へ」ボタンクリック
     def on_back_click(e):
+        # 効果音を再生
+        sound_thread = threading.Thread(target=play_sound, args=(JSON_DATA['sound_file_path']['back'],), daemon=True)
+        sound_thread.start()
+
         goto_top(e)
 
 
@@ -217,7 +205,7 @@ def main(page: ft.Page):
 
     # カウントダウン表示
     fl_countdown = ft.Container(
-        content=ft.Text("3", size=400, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_ACCENT_700),
+        content=ft.Text("3", size=400, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
         bgcolor=ft.colors.BACKGROUND,
         alignment=ft.alignment.center,
         visible=False,

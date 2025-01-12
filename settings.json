@@ -11,6 +11,7 @@
     "correct"   : ".//soundfile//Quiz-Correct_Answer02-2.mp3",
     "incorrect" : ".//soundfile//Quiz-Wrong_Buzzer02-1.mp3",
     "start"     : ".//soundfile//Countdown06-2.mp3",
-    "celebrate" : ".//soundfile//stadium_celebrate.mp3"
+    "celebrate" : ".//soundfile//stadium_celebrate.mp3",
+    "back"      : ".//soundfile//cat1.mp3"
   }
 }
