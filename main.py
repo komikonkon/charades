@@ -1,3 +1,4 @@
+import itertools
 import threading
 import time
 
@@ -39,11 +40,50 @@ def main(page: ft.Page):
         # グローバル変数を使用するための宣言
         global EN_JA_WORDS_LIST
 
+        # 虹色の色リスト（カウントダウン表示用）
+        rainbow_colors = [
+            ft.Colors.RED, ft.Colors.ORANGE, ft.Colors.YELLOW,ft.Colors.GREEN, ft.Colors.BLUE,
+            ft.Colors.INDIGO, ft.Colors.PURPLE, ft.Colors.PINK, ft.Colors.LIME, ft.Colors.CYAN
+        ]
+
         # 英単語一覧を取得
         EN_JA_WORDS_LIST = get_english_words(fl_level.value)
 
+        # 開始の効果音を再生
+        sound_thread = threading.Thread(target=play_sound, args=(JSON_DATA['sound_file_path']['start'],), daemon=True)
+        sound_thread.start()
+
+        # カウントダウン表示
+        fl_appbar_top.visible = False
+        fl_countdown.visible = True
+        for i in range(3, 0, -1):
+            fl_countdown.content.value = str(i)
+            for color in rainbow_colors:
+                fl_countdown.content.color = color
+                page.update()
+                time.sleep(0.1)  # 計1秒待機
+        fl_countdown.content.value = "START!"
+        fl_countdown.content.size = 250
+        page.update()
+        for color in itertools.chain(rainbow_colors, rainbow_colors, rainbow_colors):
+            fl_countdown.content.color = color
+            page.update()
+            time.sleep(0.1)
+            # カウントダウンの効果音が終了したらループを抜ける
+            if not sound_thread.is_alive():
+                break
+
+        # 効果音再生が終わるまでページ遷移は行わない
+        sound_thread.join()
+
         # ページ遷移
         page.go("/play")
+
+        # カウントダウン表示の設定をリセット
+        fl_appbar_top.visible = True
+        fl_countdown.visible = False
+        fl_countdown.content.size = 400
+        fl_countdown.content.color = ft.Colors.BLUE_ACCENT_700
 
         # タイマー開始
         if Timer.is_stop:
@@ -70,10 +110,10 @@ def main(page: ft.Page):
         sound_thread.start()
 
         # 大きな○を表示
-        fl_overlay_circle.visible = not fl_overlay_circle.visible
+        fl_overlay_circle.visible = True
         page.update()
-        time.sleep(0.1) # NOTE: ○を視認できるようにするための待機
-        fl_overlay_circle.visible = not fl_overlay_circle.visible
+        time.sleep(0.2) # NOTE: ○を視認できるようにするための待機
+        fl_overlay_circle.visible = False
         page.update()
 
         # 出題した単語のリストに追加
@@ -97,10 +137,10 @@ def main(page: ft.Page):
         sound_thread.start()
 
         # 大きな×を表示
-        fl_overlay_cross.visible = not fl_overlay_cross.visible
+        fl_overlay_cross.visible = True
         page.update()
-        time.sleep(0.1) # ×を視認できるようにするための待機
-        fl_overlay_cross.visible = not fl_overlay_cross.visible
+        time.sleep(0.2) # ×を視認できるようにするための待機
+        fl_overlay_cross.visible = False
         page.update()
 
         # 出題した単語のリストに追加
@@ -122,6 +162,9 @@ def main(page: ft.Page):
     # #################################
     # 1. トップページのコンポーネント
     # #################################
+    # タイトルバー
+    fl_appbar_top = ft.AppBar(title=ft.Text("ゲーム設定"))
+
     # 難易度選択ドロップダウン
     fl_level_intro = ft.Text("難易度を設定してください", size=20, weight=ft.FontWeight.BOLD)
     fl_level = ft.Dropdown(
@@ -172,6 +215,13 @@ def main(page: ft.Page):
         )
     )
 
+    # カウントダウン表示
+    fl_countdown = ft.Container(
+        content=ft.Text("3", size=400, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_ACCENT_700),
+        bgcolor=ft.colors.BACKGROUND,
+        alignment=ft.alignment.center,
+        visible=False,
+    )
 
     # #################################
     # 2. プレイページのコンポーネント
@@ -377,7 +427,7 @@ def main(page: ft.Page):
             ft.View(
                 "/",
                 [
-                    ft.AppBar(title=ft.Text("ゲーム設定")),
+                    fl_appbar_top,  # NOTE: 開始カウントダウン時に一時的に非表示(Visible=False)にするため別箇所で定義。
                     ft.Stack(
                         [
                             ft.Column(
@@ -398,8 +448,9 @@ def main(page: ft.Page):
                                 ],
                                 horizontal_alignment=ft.CrossAxisAlignment.CENTER
                             ),
+                            fl_countdown,
                         ],
-                        expand=True,  # 画面の見切れを防ぐために設定
+                        expand=True,  # NOTE: 画面の見切れを防ぐために設定
                         alignment=ft.alignment.center,
                     ),
                 ],
@@ -459,7 +510,7 @@ def main(page: ft.Page):
                                     horizontal_alignment=ft.CrossAxisAlignment.CENTER
                                 )
                             ],
-                            expand=True,  # 画面の見切れを防ぐために設定
+                            expand=True,  # NOTE: 画面の見切れを防ぐために設定
                             alignment=ft.alignment.center,
                         ),
                     ],

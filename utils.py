@@ -1,5 +1,6 @@
 import ctypes
 import random
+import threading
 import time
 
 import flet as ft
@@ -91,6 +92,10 @@ class Timer():
         self.fl_correct_answer_number.value = str(correct_count)
         if self.fl_correct_answer_number.page:
             self.fl_correct_answer_number.update()
+
+        # 歓声の効果音を再生
+        sound_thread = threading.Thread(target=play_sound, args=(JSON_DATA['sound_file_path']['celebrate'],), daemon=True)
+        sound_thread.start()
 
         Timer.is_stop = True
 
