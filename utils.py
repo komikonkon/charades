@@ -78,7 +78,8 @@ class Timer():
 
         # タイマー終了メッセージを表示
         self.fl_timer_text.value = "終了"
-        self.fl_timer_text.update()
+        if self.fl_timer_text.page:
+            self.fl_timer_text.update()
 
         # データテーブルを更新する
         self.fl_data_table.rows = get_data_table_rows(QUESTIONS_LIST)
