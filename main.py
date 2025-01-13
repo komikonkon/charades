@@ -1,4 +1,3 @@
-import itertools
 import threading
 import time
 
@@ -12,6 +11,7 @@ from utils import (Timer, get_data_table_columns, get_data_table_rows,
 
 
 def main(page: ft.Page):
+    # TODO: 大型リファクタリングが必要。右記を参考にClassでViewを定義。 -> https://github.com/LineIndent/flet_projects/blob/main/shop/main.py
     global QUESTIONS_LIST
 
     # アプリタイトル

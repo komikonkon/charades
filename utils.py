@@ -207,12 +207,17 @@ def get_data_table_rows(data):
 
 
 def play_sound(file_path):
+    """音声ファイルを再生する関数
+
+    Args:
+        file_path (str): 音声ファイルのパス。
+    """
     pygame.mixer.init()
     sound = pygame.mixer.Sound(file_path)
     sound.play()
     # 音が再生されるまで待機
     while pygame.mixer.get_busy():
-        pygame.time.delay(100)
+        pygame.time.delay(100)  # NOTE: DO NOT CHANGE THIS VALUE.
 
 
 def _exe_sql_sel(sql, prm=None) :
