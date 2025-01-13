@@ -1,7 +1,7 @@
+import json
 import os
 import sys
 from pathlib import Path
-import json
 
 # カレントディレクトリパス
 BASE_DIR = os.path.dirname(__file__)

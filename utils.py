@@ -1,13 +1,16 @@
 import ctypes
-import time
 import random
-import MySQLdb
-from MySQLdb.constants.CLIENT import MULTI_STATEMENTS
-import flet as ft
+import threading
+import time
 
-from read_settings import JSON_DATA
-from global_variables import QUESTIONS_LIST
+import flet as ft
+import MySQLdb
+import pygame
+from MySQLdb.constants.CLIENT import MULTI_STATEMENTS
+
 import sqls
+from global_variables import QUESTIONS_LIST
+from read_settings import JSON_DATA
 
 
 def get_screen_size():
@@ -74,7 +77,7 @@ class Timer():
             QUESTIONS_LIST.append([self.fl_display_word.value, self.fl_display_word.data, ""])
 
         # タイマー終了メッセージを表示
-        self.fl_timer_text.value = "終了！"
+        self.fl_timer_text.value = "終了"
         self.fl_timer_text.update()
 
         # データテーブルを更新する
@@ -89,6 +92,10 @@ class Timer():
         self.fl_correct_answer_number.value = str(correct_count)
         if self.fl_correct_answer_number.page:
             self.fl_correct_answer_number.update()
+
+        # 歓声の効果音を再生
+        sound_thread = threading.Thread(target=play_sound, args=(JSON_DATA['sound_file_path']['celebrate'],), daemon=True)
+        sound_thread.start()
 
         Timer.is_stop = True
 
@@ -197,6 +204,20 @@ def get_data_table_rows(data):
         cells = [ft.DataCell(ft.Text(str(t))) for t in row]
         converted_rows.append(ft.DataRow(cells=cells))
     return converted_rows
+
+
+def play_sound(file_path):
+    """音声ファイルを再生する関数
+
+    Args:
+        file_path (str): 音声ファイルのパス。
+    """
+    pygame.mixer.init()
+    sound = pygame.mixer.Sound(file_path)
+    sound.play()
+    # 音が再生されるまで待機
+    while pygame.mixer.get_busy():
+        pygame.time.delay(100)  # NOTE: DO NOT CHANGE THIS VALUE.
 
 
 def _exe_sql_sel(sql, prm=None) :
